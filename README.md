@@ -1,0 +1,2 @@
+# StockMagic
+Stock Analysis Platform
