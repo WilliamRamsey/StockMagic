@@ -1,0 +1,106 @@
+
+print("StockMagic.80 By William Ramsey")
+
+
+from datetime import date
+from datetime import time
+
+from datetime import datetime
+
+import numpy as np
+import statistics
+import pandas_datareader as web
+
+start = datetime(2020, 3, 15)
+end = datetime.now()
+
+
+
+def Data_Collect(stock):
+    print(""
+          "")
+
+    print(stock)
+
+    print(""
+          "")
+
+    df = web.DataReader(stock, 'yahoo', start, end)
+    print(df.tail(50))
+    return df
+
+
+Data_Collect("dell")
+
+#Data_Collect("tsla")
+
+#Data_Collect("qqq")
+
+#Data_Collect("nflx")
+
+print(""
+      ""
+      "")
+
+
+
+
+def findmean(stock):
+    sm = Data_Collect(stock)
+    print("Adjusted close mean = ", sm["Adj Close"].mean())
+    ACM = (sm["Adj Close"].mean())
+    print("High mean = ", sm["High"].mean())
+    HM = (sm["High"].mean())
+    print("Low mean = ", sm["Low"].mean())
+    LM = (sm["Low"].mean())
+    print("Adjusted close rolling mean ", sm["Adj Close"].rolling)
+    AJCM = (sm["Adj Close"].rolling)
+    print("-----------------------------------------------------------------------------------------------------------")
+
+
+sm = Data_Collect("stock")
+
+ACM = (sm["Adj Close"].mean())
+HM = (sm["High"].mean())
+LM = (sm["Low"].mean())
+AJCM = (sm["Adj Close"].rolling)
+
+findmean("dell")
+#findmean("tsla")
+#findmean("qqq")
+#findmean("nflx")
+
+def finddev(AJCM):
+    sm = Data_Collect("stock")
+    ACM = (sm["Adj Close"].mean())
+    HM = (sm["High"].mean())
+    LM = (sm["Low"].mean())
+    AJCM = (sm["Adj Close"].rolling)
+    print(AJCM)
+finddev("dell")
+
+
+
+
+
+
+
+
+
+
+print(""
+      ""
+      "")
+print("Data Processing")
+print("dell")
+price_list = [
+    48.810001, 49.150002, 49.369999, 49.639999, 45.580002,
+    45.570000, 44.459999, 43.070000, 44.389999, 44.660000,
+    44.040001, 43.779999, 42.090000, 41.860001, 41.029999,
+    42.250000, 43.369999, 43.650002, 41.750000, 40.490002,
+    40.189999, 40.549999, 40.000000, 42.689999, 43.389999,
+    40.840000, 40.189999, 39.689999, 38.910000, 38.750000,
+    37.400002, 40.959999, 41.509998, 41.099998, 40.450001,
+    41.340000, 40.459999, 41.560001, 40.380001, 38.369999,
+    38.910000, 36.439999, 37.139999, 36.900002, 39.549999,
+    39.799999, 38.750000, 42.540001, 39.340000, 38.849998]
