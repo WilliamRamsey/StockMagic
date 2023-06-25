@@ -1,7 +1,9 @@
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
-from alpaca_trade_api import REST, TimeFrame
+from alpaca.data.historical import StockHistoricalDataClient
+from alpaca.data.requests import StockBarsRequest
+from alpaca.data.timeframe import TimeFrame
 import datetime as dt
 
 class Alpaca:
@@ -11,7 +13,7 @@ class Alpaca:
         self.paper_account = paper_account
         self.subscribed = subscribed
 
-        self.api = REST(key_id = API_KEY, secret_key = SEC_KEY)
+        self.market_client = StockHistoricalDataClient(self.API_KEY, self.SEC_KEY)
         self.trading_client = TradingClient(self.API_KEY, self.SEC_KEY, paper=True)
         self.account = self.trading_client.get_account()
     
@@ -39,11 +41,14 @@ class Alpaca:
 
             end = dt.datetime.now()
             start = end - dt.timedelta(minutes=time_dif)
-
-        return(self.api.get_bars(symbol, frequency, start.strftime("%d-%m-%Y"), end.strftime("%d-%m-%Y"), adjustment='raw').df)
-
+        print(start.strftime("%Y-%m-%d"))
+        params = StockBarsRequest(symbol_or_symbols=symbol,
+                                  timeframe=frequency,
+                                  start=start,
+                                  end=end)
+        return self.market_client.get_stock_bars(params).df
 
 account = Alpaca("PKKYD9REBHS0NIZILM0K", "6YFj01fzxhMT23jH5R8Y7cSmObOUYgfrohQ3NK4D", True, True)
-print(account.historical_data("AAPL", "Day", bars=12))
+print(account.historical_data("AAPL", "Day", bars=3))
 # print(account.order("AAPL", "buy", 1))
 
