@@ -5,6 +5,9 @@ from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
 import datetime as dt
+import tensorflow
+import os
+import pandas as pd
 
 class Alpaca:
     def __init__(self, API_KEY, SEC_KEY, paper_account, subscribed):
@@ -52,3 +55,51 @@ account = Alpaca("PKKYD9REBHS0NIZILM0K", "6YFj01fzxhMT23jH5R8Y7cSmObOUYgfrohQ3NK
 print(account.historical_data("AAPL", "Day", bars=3))
 # print(account.order("AAPL", "buy", 1))
 
+
+# Datastructure
+# database
+# -
+class DataBase:
+    def __init__(self):
+        # Established local directory for storing data
+        self.rootdir = os.getcwd()
+        if not os.path.exists(self.rootdir + "\\database"):
+            os.makedirs(self.rootdir + "\\database")
+        if not os.path.exists(self.rootdir + "/database\\raw"):
+            os.makedirs(self.rootdir + "\\database\\raw")
+        if not os.path.exists(self.rootdir + "\\database\\normalized"):
+            os.makedirs(self.rootdir + "\\database\\normalized")
+        if not os.path.exists(self.rootdir + "\\database\\raw\\Minute"):
+            os.makedirs(self.rootdir + "\\database\\raw\\Minute")
+        if not os.path.exists(self.rootdir + "\\database\\raw/Hour"):
+            os.makedirs(self.rootdir + "\\database\\raw\\Hour")
+        if not os.path.exists(self.rootdir + "\\database\\raw\\Day"):
+            os.makedirs(self.rootdir + "\\database\\raw\\Day")
+        if not os.path.exists(self.rootdir + "\\database\\normalized\\Minute"):
+            os.makedirs(self.rootdir + "\\database\\normalized\\Minute")
+        if not os.path.exists(self.rootdir + "\\database\\normalized\\Hour"):
+            os.makedirs(self.rootdir + "\\database\\normalized\\Hour")
+        if not os.path.exists(self.rootdir + "\\database\\normalized\\Day"):
+            os.makedirs(self.rootdir + "\\database\\normalized\\Day")
+
+    def reset_database(self):
+        # Deletes all files in the database
+        for dir in os.listdir(self.rootdir + "\\database\\raw"):
+            for file in os.listdir(self.rootdir + "\\database\\raw\\" + dir):
+                open(f"{self.rootdir}\\database\\raw\\{dir}\\{file}", "w").close()
+            
+        for dir in os.listdir(self.rootdir + "\\database\\normalized"):
+            for file in os.listdir(self.rootdir + "\\database\\normalized\\" + dir):
+                open(f"{self.rootdir}\\database\\normalized\\{dir}\\{file}", "w").close()
+
+    def add_entry(self, data, symbol, frequency, normalized=False):
+        # Write file in /database/{type}/{frequency}/
+        # Data will be imputted as dataframe and saved to CSV
+        if normalized:
+            data.to_csv(f"{self.rootdir}\\database\\normalized\\{frequency}\\{symbol}.csv")
+        else:
+            data.to_csv(f"{self.rootdir}\\database\\raw\\{frequency}\\{symbol}.csv")
+
+base = DataBase()
+base.reset_database()
+base.add_entry(account.historical_data("AAPL", "Minute", bars=3), "AAPL", "Minute", normalized=False)
