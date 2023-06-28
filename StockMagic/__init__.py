@@ -136,7 +136,7 @@ account = Alpaca("PKKYD9REBHS0NIZILM0K", "6YFj01fzxhMT23jH5R8Y7cSmObOUYgfrohQ3NK
 # print(account.order("AAPL", "buy", 1))
 
 base = DataBase()
-datapoint = base.Security(data=account.historical_data("AAPL", "Day", bars=10))
+datapoint = base.Security(data=account.historical_data("QQQ", "Day", bars=20))
 # print(datapoint.normalize(3))
 datapoint.add()
 # base.reset()
