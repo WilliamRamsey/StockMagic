@@ -1,13 +1,18 @@
+# alpaca imports
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
-import datetime as dt
-import tensorflow
-import os
+# tensorflow and data regression imports
 import pandas as pd
+import tensorflow as tf
+
+# misc imports
+import datetime as dt
+import os
+
 
 class Alpaca:
     def __init__(self, API_KEY, SEC_KEY, paper_account, subscribed):
@@ -60,7 +65,6 @@ class DataBase:
             os.makedirs(self.rootdir + "\\database\\securities")
         if not os.path.exists(self.rootdir + "\\database\\datasets"):
             os.makedirs(self.rootdir + "\\database\\datasets")
-
 
 
     def reset(self):
@@ -134,9 +138,17 @@ class DataBase:
 account = Alpaca("PKKYD9REBHS0NIZILM0K", "6YFj01fzxhMT23jH5R8Y7cSmObOUYgfrohQ3NK4D", True, True)
 # print(account.historical_data("AAPL", "Day", bars=3))
 # print(account.order("AAPL", "buy", 1))
+account.order("SCWX", "buy", 1)
 
 base = DataBase()
 datapoint = base.Security(data=account.historical_data("QQQ", "Day", bars=20))
+print(datapoint.data)
+
 # print(datapoint.normalize(3))
 datapoint.add()
 # base.reset()
+
+
+# Pull close data and create standard length
+# Set 'train'/'test' period
+# Load into 
