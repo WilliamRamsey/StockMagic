@@ -1,4 +1,5 @@
 # alpaca imports
+from typing import Any
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
@@ -7,8 +8,9 @@ from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
 # tensorflow and data regression imports
 import pandas as pd
+import numpy as np
 import tensorflow as tf
-
+from tensorflow.keras.datasets import mnist
 # misc imports
 import datetime as dt
 import os
@@ -103,10 +105,11 @@ class DataBase:
                 if not os.path.exists(f"{self.datapath}\\{self.frequency}"):
                     os.makedirs(f"{self.datapath}\\{self.frequency}")
 
-        """
         def __call__(self):
             return self.data
-        """
+        
+        def __len__(self):
+            return len(self.data)
 
         def add(self):
             # Write file in /database/{type}/{frequency}/
@@ -122,33 +125,50 @@ class DataBase:
             # Deletes file in /database/{type}/{frequency}/
             os.remove(self.datapath)
         
-        """
-        def normalize(self, output_length):
-            if len(self.data['close'].to_numpy()) < output_length:
-                return None
-            else:
-                unormalized_data = self.data['close'].to_numpy()[-output_length:]
-                normalized_data = (unormalized_data - unormalized_data.min()) / (unormalized_data.max() - unormalized_data.min())
-                return normalized_data
-        """
-
-    class DataSet:
         pass
+    
+    class Dataset:
+        def __init__(self, forsee_len, frequency, start=None, end=None, bars=None):
+            self.forsee_len = forsee_len
+            self.frequency = frequency
+            self.start = start
+            self.end = end
+            self.bars = bars
+            self.annotations = {"labels":[], "data":[]}
+
+        def __call__(self):
+            return self.annotations
+            
+        def add_stock(self, data):
+            # Normalization and annotation built in
+            raw = data['close'].to_numpy()
+            normalized = []
+            for datapoint in raw:
+                normalized_datapoint = (datapoint - raw.min()) / (raw.max() - raw.min())
+                normalized.append(normalized_datapoint)
+            start_data = normalized[:-self.forsee_len]
+            end_data = normalized[-self.forsee_len:]
+            label = (max(end_data), min(end_data))
+            self.annotations["labels"].append(label)
+            self.annotations["data"].append(end_data)
+
 
 account = Alpaca("PKKYD9REBHS0NIZILM0K", "6YFj01fzxhMT23jH5R8Y7cSmObOUYgfrohQ3NK4D", True, True)
-# print(account.historical_data("AAPL", "Day", bars=3))
-# print(account.order("AAPL", "buy", 1))
-account.order("SCWX", "buy", 1)
 
 base = DataBase()
-datapoint = base.Security(data=account.historical_data("QQQ", "Day", bars=20))
-print(datapoint.data)
+dataset = base.Dataset(forsee_len=10, frequency="Minute", bars=31)
 
-# print(datapoint.normalize(3))
-datapoint.add()
-# base.reset()
+symbols = ['QQQ', 'SPY', 'AAPL', 'ABNB', 'ADBE', 'ADI', 'ADP', 'ADSK', 'AEP', 'ALGN', 'AMAT', 'AMD', 'AMGN', 'AMZN', 'ANSS', 'ASML', 'ATVI', 'AVGO', 'AZN', 'BIDU', 'BIIB', 'BKNG', 'CDNS', 'CEG', 'CMCSA', 'COST', 'CPRT', 'CRWD', 'CSCO', 'CSX', 'CTAS', 'CTSH', 'DDOG', 'DLTR', 'DOCU', 'DXCM', 'EA', 'EBAY', 'EXC', 'FAST', 'META', 'FISV', 'FTNT', 'GILD', 'GOOG', 'GOOGL', 'HON', 'ILMN', 'INTC', 'INTU', 'ISRG', 'JD', 'KDP', 'KHC', 'KLAC', 'LCID', 'LRCX', 'LULU', 'MAR', 'MCHP', 'MDLZ', 'MELI', 'MNST', 'MRNA', 'MRVL', 'MSFT', 'MTCH', 'MU', 'NFLX', 'NTES', 'NVDA', 'NXPI', 'ODFL', 'OKTA', 'ORLY', 'PANW', 'PAYX', 'PCAR', 'PDD', 'PEP', 'PYPL', 'QCOM', 'REGN', 'ROST', 'SBUX', 'SGEN', 'SIRI', 'SNPS', 'SPLK', 'SWKS', 'TEAM', 'TMUS', 'TLSA', 'TXN', 'VRSK', 'VRSN', 'VRTX', 'WBA', 'WDAY', 'XEL', 'ZM', 'ZS']
+
+for symbol in symbols:
+    stock = account.historical_data(symbol, "Day", bars=50).tail(31)
+    if len(stock) == 31:
+        dataset.add_stock(stock)
+
+tf_dataset = tf.data.Dataset.from_tensor_slices((dataset.annotations['data'], dataset.annotations['labels']))
+print(tf_dataset)
 
 
-# Pull close data and create standard length
-# Set 'train'/'test' period
-# Load into 
+
+# (x_train, y_train), (x_test, y_test) = mnist.load_data()
+# print(x_train[0], y_train[0])
