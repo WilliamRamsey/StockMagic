@@ -150,25 +150,58 @@ class DataBase:
             end_data = normalized[-self.forsee_len:]
             label = (max(end_data), min(end_data))
             self.annotations["labels"].append(label)
-            self.annotations["data"].append(end_data)
+            self.annotations["data"].append(start_data)
 
 
 account = Alpaca("PKKYD9REBHS0NIZILM0K", "6YFj01fzxhMT23jH5R8Y7cSmObOUYgfrohQ3NK4D", True, True)
 
 base = DataBase()
-dataset = base.Dataset(forsee_len=10, frequency="Minute", bars=31)
+
+train_dataset = base.Dataset(forsee_len=10, frequency="Minute", bars=31)
+test_dataset = base.Dataset(forsee_len=10, frequency="Minute", bars=31)
 
 symbols = ['QQQ', 'SPY', 'AAPL', 'ABNB', 'ADBE', 'ADI', 'ADP', 'ADSK', 'AEP', 'ALGN', 'AMAT', 'AMD', 'AMGN', 'AMZN', 'ANSS', 'ASML', 'ATVI', 'AVGO', 'AZN', 'BIDU', 'BIIB', 'BKNG', 'CDNS', 'CEG', 'CMCSA', 'COST', 'CPRT', 'CRWD', 'CSCO', 'CSX', 'CTAS', 'CTSH', 'DDOG', 'DLTR', 'DOCU', 'DXCM', 'EA', 'EBAY', 'EXC', 'FAST', 'META', 'FISV', 'FTNT', 'GILD', 'GOOG', 'GOOGL', 'HON', 'ILMN', 'INTC', 'INTU', 'ISRG', 'JD', 'KDP', 'KHC', 'KLAC', 'LCID', 'LRCX', 'LULU', 'MAR', 'MCHP', 'MDLZ', 'MELI', 'MNST', 'MRNA', 'MRVL', 'MSFT', 'MTCH', 'MU', 'NFLX', 'NTES', 'NVDA', 'NXPI', 'ODFL', 'OKTA', 'ORLY', 'PANW', 'PAYX', 'PCAR', 'PDD', 'PEP', 'PYPL', 'QCOM', 'REGN', 'ROST', 'SBUX', 'SGEN', 'SIRI', 'SNPS', 'SPLK', 'SWKS', 'TEAM', 'TMUS', 'TLSA', 'TXN', 'VRSK', 'VRSN', 'VRTX', 'WBA', 'WDAY', 'XEL', 'ZM', 'ZS']
 
-for symbol in symbols:
+for symbol in symbols[:60]:
     stock = account.historical_data(symbol, "Day", bars=50).tail(31)
     if len(stock) == 31:
-        dataset.add_stock(stock)
+        train_dataset.add_stock(stock)
 
-tf_dataset = tf.data.Dataset.from_tensor_slices((dataset.annotations['data'], dataset.annotations['labels']))
-print(tf_dataset)
+for symbol in symbols[60:]:
+    stock = account.historical_data(symbol, "Day", bars=50).tail(31)
+    if len(stock) == 31:
+        test_dataset.add_stock(stock)
 
+
+# Generates train data
+tf_train = tf.data.Dataset.from_tensor_slices((train_dataset.annotations['data'], train_dataset.annotations['labels']))
+tf_train = tf_train.shuffle(buffer_size=len(tf_train))
+tf_train = tf_train.cache()
+tf_train = tf_train.prefetch(tf.data.experimental.AUTOTUNE)
+
+# Generates test data
+tf_test = tf.data.Dataset.from_tensor_slices((test_dataset.annotations['data'], test_dataset.annotations['labels']))
+tf_test = tf_test.shuffle(buffer_size=len(tf_test))
+tf_test = tf_test.cache()
+tf_test = tf_test.prefetch(tf.data.experimental.AUTOTUNE)
 
 
 # (x_train, y_train), (x_test, y_test) = mnist.load_data()
 # print(x_train[0], y_train[0])
+
+
+model = tf.keras.Sequential([
+    tf.keras.Input((21, 1), name="feature"),
+    tf.keras.layers.Dense(21),
+    tf.keras.layers.Dense(21, activation="relu"),
+    tf.keras.layers.Dense(2)
+])
+
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), metrics=['accuracy'], loss='mse')
+model.summary()
+
+# Train model'])
+model.fit(tf_train, epochs=10, validation_data=tf_test)
+
+
+# Make predictions
