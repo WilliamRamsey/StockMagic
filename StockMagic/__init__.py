@@ -6,6 +6,7 @@ from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
+
 # tensorflow and data regression imports
 import pandas as pd
 import numpy as np
