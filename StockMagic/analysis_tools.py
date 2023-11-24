@@ -25,18 +25,28 @@ def simple_moving_average(data: object, period: int):
     return sma_list
 
 def crossover(list1: list, list2: list):
+
+    # Determine when list 1 is above list 2
     list1_above = []
     for i in range(len(list1)):
         if list1[i] > list2[i]:
             list1_above.append(True)
         else:
             list1_above.append(False)
-    print(list1_above)
 
+    # Dertermine when list 1 crosses over list 2
+    crossing_up_indices = []
+    crossing_down_indices = []
     for i in range(len(list1_above)):
-        i += 1
-        if list1_above[i] != list1_above[i-1]:
-            print(i)
-            
+        # Crossing up
+        if list1_above[i] == True and list1_above[i-1] == False:
+            crossing_up_indices.append(i)
+        # Crossing down
+        elif list1_above[i] == False and list1_above[i-1] == True:
+            crossing_down_indices.append(i)
+        
+    return crossing_up_indices, crossing_down_indices
+        
+
         
 
