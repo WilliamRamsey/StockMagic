@@ -28,16 +28,16 @@ class Alpaca:
         market_order = self.trading_client.submit_order(order_data)
         return market_order
 
-    def historical_data(self, symbol, frequency, start=None, end=None, bars=None):
-        if bars is not None:
+    def historical_data(self, symbol, frequency, start=None, end=None, period=None):
+        if period is not None:
             if frequency == "Minute":
-                time_dif = bars
+                time_dif = period
                 frequency = TimeFrame.Minute
             elif frequency == "Hour":
-                time_dif = 60 * bars
+                time_dif = 60 * period
                 frequency = TimeFrame.Hour
             else:
-                time_dif = 1440 * bars
+                time_dif = 1440 * period
                 frequency = TimeFrame.Day
 
             end = dt.datetime.now()

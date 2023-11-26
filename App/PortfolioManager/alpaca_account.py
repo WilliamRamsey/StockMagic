@@ -1,12 +1,10 @@
-# Alpaca trading modules
+from typing import Any
 from alpaca.trading.client import TradingClient
 from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
-# Aplaca data modules
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame
-# Other modules
 import datetime as dt
 
 class Alpaca:
@@ -30,28 +28,23 @@ class Alpaca:
         market_order = self.trading_client.submit_order(order_data)
         return market_order
 
-    def historical_data(self, symbol, frequency, start=None, end=None, bars=None):
-        if bars is not None:
+    def historical_data(self, symbol, frequency, start=None, end=None, period=None):
+        if period is not None:
             if frequency == "Minute":
-                time_dif = bars
+                time_dif = period
                 frequency = TimeFrame.Minute
             elif frequency == "Hour":
-                time_dif = 60 * bars
+                time_dif = 60 * period
                 frequency = TimeFrame.Hour
             else:
-                time_dif = 1440 * bars
+                time_dif = 1440 * period
                 frequency = TimeFrame.Day
 
             end = dt.datetime.now()
             start = end - dt.timedelta(minutes=time_dif)
+            
         params = StockBarsRequest(symbol_or_symbols=symbol,
                                   timeframe=frequency,
                                   start=start,
                                   end=end)
         return self.market_client.get_stock_bars(params).df
-
-API_KEY = "PKNZJ7BV3Y133CNN3ZAT"
-SEC_KEY = "pqqJpfNpt2RnrTo0q5gXBEMcYxqmvmXit1fzCsyT"
-
-account = Alpaca(API_KEY=API_KEY, SEC_KEY=SEC_KEY, paper_account=True, subscribed=True)
-data = account.historical_data("QQQ", "Hour", bars=12)
