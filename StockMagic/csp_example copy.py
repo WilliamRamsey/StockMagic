@@ -1,6 +1,5 @@
 from alpaca_account import *
 from analysis_tools import *
-from backtesting import *
 from assets_classes import *
 
 from plotly import graph_objects as go
@@ -39,6 +38,7 @@ total_gain_percent_list = []
 stock_performance_list = []
 
 for ticker in ticker_list:
+    print(f"\nAnalyzing {ticker}")
     """Error Handling"""
     # My s&p spreadsheet is old and some of the symbols for stocks have changed
     # This code handles the exceptions created by requesting a ticker that doesn't exis in the aplaca SDK
