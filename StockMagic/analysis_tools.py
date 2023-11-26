@@ -25,7 +25,6 @@ def simple_moving_average(data: object, period: int):
     return sma_list
 
 def crossover(list1: list, list2: list):
-
     # Determine when list 1 is above list 2
     list1_above = []
     for i in range(len(list1)):
