@@ -7,7 +7,6 @@ from plotly import graph_objects as go
 import pandas as pd
 import math
 
-
 # Keys for Alpaca API
 API_KEY = "PKNZJ7BV3Y133CNN3ZAT"
 SEC_KEY = "pqqJpfNpt2RnrTo0q5gXBEMcYxqmvmXit1fzCsyT"
@@ -17,6 +16,8 @@ account = Alpaca(API_KEY=API_KEY, SEC_KEY=SEC_KEY, paper_account=True, subscribe
 # print(account.historical_data("QQQ", "Minute", periods=3000)['close'])
 
 
+
+    
 # Generates list of stocks in sp500
 spx_df = pd.read_csv("StockMagic/spx_data.csv")
 ticker_list = spx_df["Symbol"].to_list()
