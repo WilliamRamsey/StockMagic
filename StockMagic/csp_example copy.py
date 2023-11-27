@@ -19,13 +19,20 @@ print("\n\n\n\n\n\n\n\n\n\n--- StockMagic v.0.0.2 ---\n\n\n\n\n\n\n\n")
 to_reccommend = input("Do you want to be notifed of SMA crossovers? (y/n)>")
 if to_reccommend == "y":
     to_reccommend = True
-    to_graph = input("Would you like to graph the crossovers? (y/n)>")
-    if to_graph == "y":
-        to_graph = True
+else:
+    to_reccommend = False
+
+to_graph = input("Would you like to graph the crossovers? (y/n)>")
+if to_graph == "y":
+    to_graph = True
+else:
+    to_graph = False
 
 to_backtest = input("Do you want to backtest the stragety? (y/n)>")
 if to_backtest == "y":
     to_backtest = True
+else:
+    to_backtest = False
     
 # Generates list of stocks in sp500
 spx_df = pd.read_csv("StockMagic/spx_data.csv")
@@ -44,15 +51,16 @@ for ticker in ticker_list:
     # This code handles the exceptions created by requesting a ticker that doesn't exis in the aplaca SDK
     try:
         # Returns a pandas dataframe full of juicy stock data
-        df = account.historical_data(ticker, "Hour", periods=5000)
+        # This data has raw stock splits so be careful
+        df = account.historical_data(ticker, "Day", periods=365)
     except AttributeError:
         print(f"{ticker} not found")
         continue
     
     """Getting SMA"""
     # Custom SMA function built in pandas
-    df["sma20"] = simple_moving_average(df["close"], 20)
-    df["sma50"] = simple_moving_average(df["close"], 50)
+    df["sma50"] = simple_moving_average(df["close"], 20)
+    df["sma200"] = simple_moving_average(df["close"], 50)
     # SMA returns NaN values for the length of the period at the start of each column
     df = df.dropna() 
 
@@ -65,7 +73,7 @@ for ticker in ticker_list:
 
     """Finding Crossovers"""
     # Function returns tuple of two lists containing the index of the crossover as an int 
-    up_indexs, down_indexes = crossover(df["sma20"], df["sma50"])
+    up_indexs, down_indexes = crossover(df["sma50"], df["sma200"])
 
     for index in up_indexs:
         """Determining if crossup is recent"""
@@ -83,7 +91,7 @@ for ticker in ticker_list:
                                                  close=df['close'],
                                                  name=ticker)])
                 fig.add_trace(go.Scatter(x=timestamp_list, y=df['sma50'], mode='lines', name='sma50'))
-                fig.add_trace(go.Scatter(x=timestamp_list, y=df['sma20'], mode='lines', name='sma20'))
+                fig.add_trace(go.Scatter(x=timestamp_list, y=df['sma200'], mode='lines', name='sma200'))
                 fig.show()
         
 
@@ -103,7 +111,7 @@ for ticker in ticker_list:
                                                  close=df['close'],
                                                  name=ticker)])
                 fig.add_trace(go.Scatter(x=timestamp_list, y=df['sma50'], mode='lines', name='sma50'))
-                fig.add_trace(go.Scatter(x=timestamp_list, y=df['sma20'], mode='lines', name='sma20'))
+                fig.add_trace(go.Scatter(x=timestamp_list, y=df['sma200'], mode='lines', name='sma200'))
                 fig.show()          
 
     """Backtesting"""
