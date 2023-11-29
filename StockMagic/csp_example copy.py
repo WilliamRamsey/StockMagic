@@ -11,6 +11,7 @@ API_KEY = "PKNZJ7BV3Y133CNN3ZAT"
 SEC_KEY = "pqqJpfNpt2RnrTo0q5gXBEMcYxqmvmXit1fzCsyT"
 
 # Gets stock data using alpaca API
+# See aplaca_account.py for source code
 account = Alpaca(API_KEY=API_KEY, SEC_KEY=SEC_KEY, paper_account=True, subscribed=True)
 # print(account.historical_data("QQQ", "Minute", periods=3000)['close'])
 
@@ -46,23 +47,27 @@ stock_performance_list = []
 
 for ticker in ticker_list:
     print(f"\nAnalyzing {ticker}")
+
     """Error Handling"""
-    # My s&p spreadsheet is old and some of the symbols for stocks have changed
-    # This code handles the exceptions created by requesting a ticker that doesn't exis in the aplaca SDK
     try:
         # Returns a pandas dataframe full of juicy stock data
         # This data has raw stock splits so be careful
+        # See aplaca_account.py for source code
         df = account.historical_data(ticker, "Day", periods=365)
+
+        # My s&p spreadsheet is old and some of the symbols for stocks have changed
+    # This code handles the exceptions created by requesting a ticker that doesn't exis in the aplaca SDK
     except AttributeError:
         print(f"{ticker} not found")
         continue
     
     """Getting SMA"""
     # Custom SMA function built in pandas
+    # See analysis_tools.py for this source code
     df["sma50"] = simple_moving_average(df["close"], 20)
     df["sma200"] = simple_moving_average(df["close"], 50)
     # SMA returns NaN values for the length of the period at the start of each column
-    df = df.dropna() 
+    df = df.dropna()
 
     """Getting index"""
     # Gets timestamps in accessable list
@@ -73,6 +78,7 @@ for ticker in ticker_list:
 
     """Finding Crossovers"""
     # Function returns tuple of two lists containing the index of the crossover as an int 
+    # See analysis_tools.py for this source code
     up_indexs, down_indexes = crossover(df["sma50"], df["sma200"])
 
     for index in up_indexs:

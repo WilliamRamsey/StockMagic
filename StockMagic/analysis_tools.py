@@ -46,7 +46,9 @@ def crossover(list1: list, list2: list):
         
     return crossing_up_indices, crossing_down_indices
        
+"""
 def sma_crossover(data: object, period: int):
     sma_list = simple_moving_average(data, period)
-    return crossover(data, sma_list)        
+    return crossover(data, sma_list)
+"""
 
